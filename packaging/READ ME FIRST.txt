@@ -1,0 +1,65 @@
+UWUVCI for macOS
+================
+
+A native Mac version of UWUVCI AIO, the Wii U Virtual Console injector.
+Nothing else needs to be installed: no Wine, no .NET, no helper program.
+
+
+1. INSTALL
+
+   Drag "UWUVCI" into your Applications folder (or anywhere you like).
+
+
+2. FIRST START  (one time only)
+
+   The app is not signed with a paid Apple developer certificate, so macOS
+   asks you to approve it the first time:
+
+     a. Double-click UWUVCI. macOS says it can't be opened. Click "Done".
+     b. Open System Settings > Privacy & Security, scroll down, and click
+        "Open Anyway" next to the message about UWUVCI.
+     c. Confirm with "Open Anyway" (and your password or Touch ID).
+
+   On macOS 14 and older you can instead right-click UWUVCI and choose
+   "Open", then "Open" again.
+
+   If you are comfortable with Terminal, this one line does the same:
+
+     xattr -dr com.apple.quarantine /Applications/UWUVCI.app
+
+   After that it opens like any other app.
+
+
+3. USING IT
+
+   On first start UWUVCI downloads a few small files it needs.
+
+   Pick a console on the left, choose a base game, choose your ROM, and
+   press Inject. Everything works the same way as on Windows, so the
+   regular guides apply:
+
+     https://uwuvci-prime.github.io/UWUVCI-Resources/
+
+   You need the Wii U Common Key and the Title Key of the base game you
+   want to use, exactly as on Windows. UWUVCI checks them when you enter
+   them but does not provide them. You can also use a base you dumped from
+   your own Wii U ("Custom base").
+
+   Finished injects are saved to  Documents/UWUVCI/InjectedGames
+   (you can change this under Settings).
+
+
+NOTES
+
+   * Wii and GameCube injects need about 15 GB of free disk space while
+     they are being made.
+   * Config files (.uwuvci) are interchangeable with the Windows version.
+   * Wii cheat-code (GCT) patching uses a tool that only exists for Intel
+     Macs. On Apple Silicon it needs Rosetta; if it is not installed,
+     run this in Terminal:  softwareupdate --install-rosetta
+   * Not available on macOS, because they depend on closed Windows-only
+     programs: Wii video mode patching (NTSC <-> PAL), NES/SNES "Pixel
+     Perfect" mode, the cafe2wii (c2w) patcher, and the built-in
+     Nintendont and N64 INI editors.
+   * Your settings, downloaded bases and logs live in
+     ~/Library/Application Support/UWUVCI

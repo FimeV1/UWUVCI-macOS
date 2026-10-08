@@ -1,0 +1,15 @@
+<Project>
+
+  <!-- Keep the builder's folder names out of the shipped files: no debug symbols in Release (their path would be
+       recorded in each assembly), and source paths rewritten to a fixed prefix. -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <PathMap>$(MSBuildThisFileDirectory)=/src/</PathMap>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+</Project>

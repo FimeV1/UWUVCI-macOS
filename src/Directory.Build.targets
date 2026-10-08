@@ -1,0 +1,16 @@
+<Project>
+
+  <!-- Prebuilt libraries shared with the Windows app; every project that touches their types needs the reference. -->
+  <ItemGroup>
+    <Reference Include="GameBaseClassLibrary">
+      <HintPath>$(MSBuildThisFileDirectory)..\libs\GameBaseClassLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="WiiUDownloaderLibrary">
+      <HintPath>$(MSBuildThisFileDirectory)..\libs\WiiUDownloaderLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="nfs2iso2nfs">
+      <HintPath>$(MSBuildThisFileDirectory)..\libs\nfs2iso2nfs.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
