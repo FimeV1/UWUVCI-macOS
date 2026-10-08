@@ -1,0 +1,297 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="UWUVCI.App.Views.MainWindow"
+        Title="UWUVCI"
+        Icon="avares://UWUVCI/Assets/app.ico"
+        Width="1040" Height="760" MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+  <Grid ColumnDefinitions="210,*">
+
+    <!-- Sidebar -->
+    <ThemeVariantScope Grid.Column="0" RequestedThemeVariant="Dark">
+    <Border Background="#20242E">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="18,20,18,10">
+          <TextBlock Text="UWUVCI" FontSize="24" FontWeight="Bold" Foreground="White" />
+          <TextBlock Text="Wii U injector" Classes="hint" Foreground="White" />
+        </StackPanel>
+        <ListBox Name="ConsoleList" ItemsSource="{Binding Consoles}" SelectedItem="{Binding SelectedConsole}"
+                 Background="Transparent" Margin="8,6" IsEnabled="{Binding !IsBusy}">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="10" Height="30">
+                <Image Source="{Binding Icon}" Width="26" Height="26" IsVisible="{Binding !IsSettings}" />
+                <TextBlock Text="⚙" FontSize="18" Width="26" TextAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsSettings}" />
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+    </ThemeVariantScope>
+
+    <!-- Inject page -->
+    <DockPanel Grid.Column="1" IsVisible="{Binding IsInject}" IsEnabled="{Binding !IsBusy}">
+      <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="0,1,0,0" Padding="28,14">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+          <Button Grid.Column="0" Content="Import config…" Click="OnImportConfig" Margin="0,0,8,0" />
+          <Button Grid.Column="1" Content="Export config…" Click="OnExportConfig" />
+          <Button Grid.Column="3" Content="Inject" Classes="primary" IsEnabled="{Binding CanInject}" Click="OnInject" />
+        </Grid>
+      </Border>
+
+      <ScrollViewer>
+        <StackPanel Margin="28,22,28,28" MaxWidth="820" HorizontalAlignment="Left">
+          <TextBlock Text="{Binding Title}" Classes="h1" />
+
+          <!-- Base -->
+          <TextBlock Text="1 · BASE GAME" Classes="section" />
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <ComboBox ItemsSource="{Binding Bases}" SelectedItem="{Binding SelectedBase}" HorizontalAlignment="Stretch" MaxDropDownHeight="420" />
+              <TextBlock Text="{Binding BaseStatus}" TextWrapping="Wrap" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="Enter Common Key…" Click="OnEnterCommonKey" IsVisible="{Binding NeedsCommonKey}" />
+                <Button Content="Enter Title Key…" Click="OnEnterTitleKey" IsVisible="{Binding NeedsTitleKey}" />
+                <Button Content="Download base" Classes="primary" Click="OnDownloadBase" IsVisible="{Binding CanDownloadBase}" />
+                <Button Content="Choose folder…" Click="OnChooseCustomBase" IsVisible="{Binding BaseIsCustom}" />
+              </StackPanel>
+              <TextBlock Text="{Binding CustomBasePath}" Classes="hint" IsVisible="{Binding BaseIsCustom}" />
+            </StackPanel>
+          </Border>
+
+          <!-- Game -->
+          <TextBlock Text="2 · GAME" Classes="section" />
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <CheckBox Content="TurboGrafx-CD game (pick the game's folder)" IsChecked="{Binding TurboCd}" IsVisible="{Binding IsTg16}" />
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Text="ROM" Classes="label" />
+                <TextBox Grid.Column="1" Name="RomBox" Text="{Binding RomPath}" Watermark="{Binding RomHint}" DragDrop.AllowDrop="True" />
+                <Button Grid.Column="2" Content="Browse…" Click="OnBrowseRom" Margin="8,0,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding IsGcn}">
+                <TextBlock Text="Disc 2" Classes="label" />
+                <TextBox Grid.Column="1" Text="{Binding Disc2Path}" Watermark="Optional, for two-disc games" />
+                <Button Grid.Column="2" Content="Browse…" Click="OnBrowseDisc2" Margin="8,0,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Text="Game name" Classes="label" />
+                <TextBox Grid.Column="1" Text="{Binding GameName}" MaxLength="250" Watermark="Shown on the Wii U menu. Use | to split it over two lines, e.g. Wii|Sports" />
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <!-- Images -->
+          <TextBlock Text="3 · IMAGES AND SOUND (OPTIONAL)" Classes="section" />
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                <TextBlock Text="Menu icon" Classes="label" ToolTip.Tip="iconTex, 128×128" />
+                <TextBox Grid.Column="1" Text="{Binding IconPath}" Watermark="128 × 128" Tag="icon" />
+                <Button Grid.Column="2" Content="Browse…" Click="OnBrowseImage" Tag="icon" Margin="8,0,0,0" />
+                <Button Grid.Column="3" Content="Create…" Click="OnCreateImage" Tag="icon" Margin="8,0,0,0" />
+                <Image Grid.Column="4" Source="{Binding IconPreview}" Width="40" Height="40" Margin="10,0,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                <TextBlock Text="TV boot image" Classes="label" ToolTip.Tip="bootTvTex, 1280×720" />
+                <TextBox Grid.Column="1" Text="{Binding TvPath}" Watermark="1280 × 720" />
+                <Button Grid.Column="2" Content="Browse…" Click="OnBrowseImage" Tag="tv" Margin="8,0,0,0" />
+                <Button Grid.Column="3" Content="Create…" Click="OnCreateImage" Tag="tv" Margin="8,0,0,0" />
+                <Image Grid.Column="4" Source="{Binding TvPreview}" Width="71" Height="40" Margin="10,0,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                <TextBlock Text="GamePad image" Classes="label" ToolTip.Tip="bootDrcTex, 854×480" />
+                <TextBox Grid.Column="1" Text="{Binding DrcPath}" Watermark="854 × 480 · leave empty to use the TV image" />
+                <Button Grid.Column="2" Content="Browse…" Click="OnBrowseImage" Tag="drc" Margin="8,0,0,0" />
+                <Image Grid.Column="3" Source="{Binding DrcPreview}" Width="71" Height="40" Margin="10,0,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                <TextBlock Text="Logo" Classes="label" ToolTip.Tip="bootLogoTex, 170×42" />
+                <TextBox Grid.Column="1" Text="{Binding LogoPath}" Watermark="170 × 42" />
+                <Button Grid.Column="2" Content="Browse…" Click="OnBrowseImage" Tag="logo" Margin="8,0,0,0" />
+                <Image Grid.Column="3" Source="{Binding LogoPreview}" Width="71" Height="18" Margin="10,0,0,0" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                <TextBlock Text="Boot sound" Classes="label" />
+                <TextBox Grid.Column="1" Text="{Binding BootSoundPath}" Watermark="MP3, WAV or BTSND · the first 6 seconds are used" />
+                <Button Grid.Column="2" Content="Browse…" Click="OnBrowseSound" Margin="8,0,0,0" />
+                <Button Grid.Column="3" Content="▶" Click="OnPlaySound" IsEnabled="{Binding HasBootSound}" Margin="8,0,0,0" ToolTip.Tip="Play" />
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <!-- Options -->
+          <TextBlock Text="4 · OPTIONS" Classes="section" IsVisible="{Binding HasOptions}" />
+          <Border Classes="card" IsVisible="{Binding HasOptions}">
+            <StackPanel Spacing="10">
+
+              <StackPanel Spacing="10" IsVisible="{Binding IsWii}">
+                <Grid ColumnDefinitions="Auto,*">
+                  <TextBlock Text="Use GamePad as" Classes="label" />
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding GamePadModeList}" SelectedIndex="{Binding GamePadMode}" MinWidth="260" IsEnabled="{Binding RomIsDisc}" />
+                </Grid>
+                <CheckBox Content="Swap L/R and ZL/ZR" IsChecked="{Binding SwapLR}" IsEnabled="{Binding CanSwapLR}" />
+                <Grid ColumnDefinitions="Auto,*">
+                  <TextBlock Text="Region patch" Classes="label" />
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding RegionModes}" SelectedIndex="{Binding RegionMode}" MinWidth="260" IsEnabled="{Binding RomIsDisc}" />
+                </Grid>
+                <WrapPanel>
+                  <CheckBox Content="Remove deflicker (VFilter)" IsChecked="{Binding RemoveDeflicker}" Margin="0,0,20,0" />
+                  <CheckBox Content="Remove dithering" IsChecked="{Binding RemoveDithering}" Margin="0,0,20,0" />
+                  <CheckBox Content="Half VFilter" IsChecked="{Binding HalfVFilter}" />
+                </WrapPanel>
+                <WrapPanel>
+                  <CheckBox Content="Don't trim the game" IsChecked="{Binding DontTrim}" Margin="0,0,20,0" />
+                  <CheckBox Content="Disable Wii Remote passthrough (homebrew / channels)" IsChecked="{Binding DisablePassthrough}" />
+                </WrapPanel>
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                  <TextBlock Text="Cheat codes" Classes="label" />
+                  <TextBox Grid.Column="1" Text="{Binding GctPaths}" AcceptsReturn="True" MaxHeight="64" Watermark="Optional .gct or .txt (Ocarina / Dolphin) files, one per line" />
+                  <Button Grid.Column="2" Content="Add…" Click="OnBrowseGct" Margin="8,0,0,0" />
+                </Grid>
+              </StackPanel>
+
+              <StackPanel Spacing="10" IsVisible="{Binding IsGcn}">
+                <WrapPanel>
+                  <CheckBox Content="Force 4:3" IsChecked="{Binding Force43}" Margin="0,0,20,0" ToolTip.Tip="Games run in 4:3 instead of 16:9" />
+                  <CheckBox Content="Disable GamePad" IsChecked="{Binding DisableGamePad}" Margin="0,0,20,0" ToolTip.Tip="The GamePad is not used as a controller" />
+                  <CheckBox Content="Don't trim the game" IsChecked="{Binding DontTrim}" />
+                </WrapPanel>
+                <TextBlock Classes="hint" Text="GameCube injects need Nintendont and its config on your SD card." />
+              </StackPanel>
+
+              <StackPanel Spacing="10" IsVisible="{Binding IsN64}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <TextBlock Text="INI file" Classes="label" />
+                  <TextBox Grid.Column="1" Text="{Binding IniPath}" Watermark="Optional game configuration. A blank one is used otherwise" />
+                  <Button Grid.Column="2" Content="Browse…" Click="OnBrowseIni" Margin="8,0,0,0" />
+                </Grid>
+                <WrapPanel>
+                  <CheckBox Content="Dark filter" IsChecked="{Binding N64DarkFilter}" Margin="0,0,20,0" ToolTip.Tip="Untick to remove the dark filter Virtual Console puts over the picture" />
+                  <CheckBox Content="Widescreen" IsChecked="{Binding N64WideScreen}" />
+                </WrapPanel>
+              </StackPanel>
+
+              <StackPanel Spacing="10" IsVisible="{Binding IsGba}">
+                <WrapPanel>
+                  <CheckBox Content="Dark filter" IsChecked="{Binding GbaDarkFilter}" Margin="0,0,20,0" ToolTip.Tip="Untick to remove the dark filter Virtual Console puts over the picture" />
+                  <CheckBox Content="PokéPatch" IsChecked="{Binding PokePatch}" />
+                </WrapPanel>
+              </StackPanel>
+
+              <StackPanel Spacing="10" IsVisible="{Binding IsNds}">
+                <Grid ColumnDefinitions="Auto,Auto,Auto">
+                  <TextBlock Text="Brightness" Classes="label" />
+                  <NumericUpDown Grid.Column="1" Value="{Binding Brightness}" Minimum="0" Maximum="100" Increment="5" FormatString="0" Width="130" />
+                  <TextBlock Grid.Column="2" Text="%  (80 is the official Virtual Console value)" Classes="hint" VerticalAlignment="Center" Margin="8,0,0,0" />
+                </Grid>
+                <Grid ColumnDefinitions="Auto,Auto,Auto">
+                  <TextBlock Text="Pixel art upscaler" Classes="label" />
+                  <NumericUpDown Grid.Column="1" Value="{Binding PixelArtUpscaler}" Minimum="0" Maximum="256" Increment="1" FormatString="0" Width="130" />
+                  <TextBlock Grid.Column="2" Text="Up to 32 is known to be safe" Classes="hint" VerticalAlignment="Center" Margin="8,0,0,0" />
+                </Grid>
+                <CheckBox Content="Add more DS screen layouts" IsChecked="{Binding DsLayout}" />
+                <CheckBox Content="This is Phantom Hourglass" IsChecked="{Binding DsPhantomHourglass}" IsEnabled="{Binding DsLayout}" Margin="24,0,0,0" />
+              </StackPanel>
+
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+    </DockPanel>
+
+    <!-- Settings page -->
+    <ScrollViewer Grid.Column="1" IsVisible="{Binding IsSettings}" IsEnabled="{Binding !IsBusy}">
+      <StackPanel Margin="28,22,28,28" MaxWidth="820" HorizontalAlignment="Left">
+        <TextBlock Text="Settings" Classes="h1" />
+
+        <TextBlock Text="KEYS" Classes="section" />
+        <Border Classes="card">
+          <StackPanel Spacing="10">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel>
+                <TextBlock Text="Wii U Common Key" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding CommonKeyStatus}" Classes="hint" />
+              </StackPanel>
+              <Button Grid.Column="1" Content="Enter…" Click="OnEnterCommonKey" />
+            </Grid>
+            <TextBlock Classes="hint" Text="Needed to download bases and to create installable (WUP) injects. Keys are checked when you enter them; UWUVCI does not provide them." />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Forget all entered Title Keys" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Content="Reset Title Keys" Click="OnResetTitleKeys" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <TextBlock Text="FOLDERS" Classes="section" />
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <StackPanel>
+                <TextBlock Text="Injected games" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding OutPath}" Classes="hint" />
+              </StackPanel>
+              <Button Grid.Column="1" Content="Show" Click="OnShowOutPath" Margin="8,0" />
+              <Button Grid.Column="2" Content="Change…" Click="OnChangeOutPath" />
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <StackPanel>
+                <TextBlock Text="Downloaded bases" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding BasePath}" Classes="hint" />
+              </StackPanel>
+              <Button Grid.Column="1" Content="Show" Click="OnShowBasePath" Margin="8,0" />
+              <Button Grid.Column="2" Content="Change…" Click="OnChangeBasePath" />
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel>
+                <TextBlock Text="App data, configs and logs" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding DataPath}" Classes="hint" />
+              </StackPanel>
+              <Button Grid.Column="1" Content="Show" Click="OnShowDataPath" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <TextBlock Text="MAINTENANCE" Classes="section" />
+        <Border Classes="card">
+          <StackPanel Spacing="10">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Download the tool files again" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Content="Update tools" Click="OnUpdateTools" />
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Refresh the lists of base games" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Content="Update base lists" Click="OnUpdateBases" />
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Guides for each console" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Content="Open guides" Click="OnOpenGuides" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <TextBlock Text="ABOUT" Classes="section" />
+        <Border Classes="card">
+          <StackPanel Spacing="6">
+            <TextBlock Text="{Binding VersionText}" FontWeight="SemiBold" />
+            <TextBlock Classes="hint" Text="A native macOS version of UWUVCI AIO by NicoAICP, Morilli and ZestyTS. It runs without Wine and without the separate helper program." />
+            <TextBlock Classes="hint" Text="Not available on macOS: Wii video mode patching (NTSC ⇄ PAL), NES/SNES Pixel Perfect mode, the cafe2wii (c2w) patcher, and the Nintendont and N64 INI editors. Those rely on closed Windows-only programs." />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- Busy overlay -->
+    <Border Grid.ColumnSpan="2" Background="#99000000" IsVisible="{Binding IsBusy}">
+      <Border Classes="card" Width="460" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="26,22">
+        <StackPanel Spacing="12">
+          <TextBlock Text="{Binding BusyTitle}" FontSize="17" FontWeight="SemiBold" />
+          <ProgressBar Value="{Binding BusyProgress}" Minimum="0" Maximum="100" Height="8" IsIndeterminate="{Binding BusyIndeterminate}" />
+          <TextBlock Text="{Binding BusyMessage}" Classes="hint" MinHeight="18" />
+        </StackPanel>
+      </Border>
+    </Border>
+  </Grid>
+</Window>
